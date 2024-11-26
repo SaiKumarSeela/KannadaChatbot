@@ -80,7 +80,7 @@ async def chat(request: ChatRequest):
         if request.language == "english":
             # Send to LLM directly
             llm_response = await call_groq_api(request.message)
-            # Translate LLM response to Kannada
+            
             
             return {"response": llm_response}
         else:  # Kannada
