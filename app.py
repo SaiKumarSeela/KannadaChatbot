@@ -5,12 +5,16 @@ from datetime import datetime
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
-
+from s3_syncer import S3Sync
 # Load environment variables
 load_dotenv()
 
 # Configuration
 GROQ_API_KEY = os.getenv('GROQ_API_KEY')
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_REGION = os.getenv("AWS_REGION")
+TRAINING_BUCKET_NAME = "conversational-history" 
 
 class MultilingualChatApp:
     def __init__(self):
@@ -20,6 +24,9 @@ class MultilingualChatApp:
             max_tokens=3000,
             temperature=0.2
         )
+        self.save_dir = "result"
+        # Initialize S3 Syncer
+        self.s3_sync = S3Sync(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION)
 
     def get_system_prompt(self, language):
         language = language.lower()
@@ -159,10 +166,14 @@ class MultilingualChatApp:
 
                     # Save to file
                     self.save_conversation(st.session_state.conversation_file, st.session_state.conversation)
+                
                     st.session_state.user_input = ""
 
                     st.rerun()
-
+        
 if __name__ == "__main__":
     app = MultilingualChatApp()
     app.run()
+    # Sync the folder to S3 after the application ends
+    app.s3_sync.sync_folder_to_s3(folder=app.save_dir, aws_bucket_name=TRAINING_BUCKET_NAME)
+
