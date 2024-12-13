@@ -24,7 +24,7 @@ groq_api_key = os.getenv('GROQ_API_KEY')
 access_token = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are an AI assistant that helps users by answering their queries and the response should be concise."),
+    ("system", "You are an AI assistant that helps users by answering their queries and the response should be concise in Kannada.Give the response in Kannada only."),
     ("human", """{query}""")
 ])
 
@@ -53,25 +53,25 @@ async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.post("/text-to-speech")
-async def text_to_speech(request: SpeechRequest ):
-    try:
-        print(request)
-        speech_lang = ''
-        # Convert text to speech
-        speech_lang = 'en' if request.language.lower() == 'english' else 'kn'
-        tts = gTTS(text=request.text, lang= speech_lang)
-        audio_io = io.BytesIO()
-        tts.write_to_fp(audio_io)
-        audio_io.seek(0)
+# @app.post("/text-to-speech")
+# async def text_to_speech(request: SpeechRequest ):
+#     try:
+#         print(request)
+#         speech_lang = ''
+#         # Convert text to speech
+#         speech_lang = 'en' if request.language.lower() == 'english' else 'kn'
+#         tts = gTTS(text=request.text, lang= speech_lang)
+#         audio_io = io.BytesIO()
+#         tts.write_to_fp(audio_io)
+#         audio_io.seek(0)
         
-        # Convert to base64
-        audio_data = base64.b64encode(audio_io.read()).decode()
+#         # Convert to base64
+#         audio_data = base64.b64encode(audio_io.read()).decode()
         
-        return JSONResponse(content={"audio_data": audio_data})
-    except Exception as e:
-        print(f"Error in text-to-speech: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+#         return JSONResponse(content={"audio_data": audio_data})
+#     except Exception as e:
+#         print(f"Error in text-to-speech: {str(e)}")
+#         raise HTTPException(status_code=500, detail=str(e))
     
 @app.post("/chat")
 async def chat(request: ChatRequest):
